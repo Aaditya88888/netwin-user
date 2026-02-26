@@ -12,8 +12,8 @@
     "build:client": "tsc && vite build",
     "build:server": "tsc --project server/tsconfig.json",
     "start": "cross-env NODE_ENV=production tsx server/index.ts",
-    "render-build": "npm install && npm run build",
-    "render-start": "node dist-server/index.js",
+    "render-build": "npm install && npm run build && ls -R dist-server || echo 'dist-server not found'",
+    "render-start": "node dist-server/server/index.js",
     "preview": "vite preview",
     "vercel-build": "npm run build"
   },
