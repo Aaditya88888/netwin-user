@@ -5,8 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { registerRoutes } from './routes';
-import { logger } from './utils/logger';
+import { registerRoutes } from './routes.js';
+import { logger } from './utils/logger.js';
 
 // Load environment variables
 dotenv.config();
