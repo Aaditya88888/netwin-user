@@ -1,0 +1,45 @@
+{
+  "name": "NetWin Tournament App",
+  "short_name": "NetWin",
+  "description": "Join gaming tournaments, manage your squad, and win prizes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#7F43FF",
+  "icons": [
+    {
+      "src": "/netwin-logo.png",
+      "sizes": "72x72 96x96 128x128 144x144 152x152 192x192 384x384 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tournaments",
+      "url": "/tournaments",
+      "icons": [{ "src": "/netwin-logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Wallet",
+      "url": "/wallet",
+      "icons": [{ "src": "/netwin-logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/tournaments.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tournament Listings"
+    },
+    {
+      "src": "/screenshots/wallet.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Wallet Management"
+    }
+  ]
+}

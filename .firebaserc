@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "netwin-tournament"
+  },
+  "targets": {
+    "netwin-tournament": {
+      "hosting": {
+        "user-app": [
+          "netwin-tournament"
+        ]
+      }
+    }
+  }
+} 
