@@ -53,30 +53,6 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Diagnostic route for Render deployment
-app.get('/api/debug-paths', (_req, res) => {
-  const distPath = path.resolve(process.cwd(), 'dist');
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
-  const debugInfo = {
-    cwd: process.cwd(),
-    dirname: __dirname,
-    env: {
-      NODE_ENV: process.env.NODE_ENV,
-      VITE_PROD: process.env.VITE_PROD,
-      PORT: process.env.PORT
-    },
-    resolvedDistPath: distPath,
-    distExists: fs.existsSync(distPath),
-    distContents: fs.existsSync(distPath) ? fs.readdirSync(distPath) : [],
-    rootContents: fs.readdirSync(process.cwd()),
-    serverDistContents: fs.existsSync(path.resolve(__dirname, '..')) ? fs.readdirSync(path.resolve(__dirname, '..')) : []
-  };
-
-  res.json(debugInfo);
-});
-
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   logger.info(`User connected: ${socket.id}`);
@@ -140,21 +116,6 @@ if (process.env.NODE_ENV === 'production' || process.env.VITE_PROD === 'true') {
     }
   }
 
-  if (found) {
-    logger.info(`✅ Found static assets at: ${distPath}`);
-  } else {
-    logger.warn(`⚠️ Could not find index.html in any expected path. Defaulting to: ${distPath}`);
-  }
-
-  // Debug middleware for assets
-  app.use((req, res, next) => {
-    if (req.path.startsWith('/assets/')) {
-      const filePath = path.join(distPath, req.path);
-      logger.info(`🔍 Asset request: ${req.path} -> exists: ${fs.existsSync(filePath)}`);
-    }
-    next();
-  });
-
   app.use(express.static(distPath));
 
   // Handle all other routes by serving index.html (client-side routing)
@@ -162,7 +123,6 @@ if (process.env.NODE_ENV === 'production' || process.env.VITE_PROD === 'true') {
     // If the request looks like a static asset (has a file extension), don't serve index.html
     const ext = path.extname(req.path);
     if (ext && ext !== '.html') {
-      logger.warn(`🚫 Asset not found, skipping index.html fallback: ${req.path}`);
       return res.status(404).type('text/plain').send(`Asset ${req.path} not found`);
     }
 
