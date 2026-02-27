@@ -53,6 +53,30 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Diagnostic route for Render deployment
+app.get('/api/debug-paths', (_req, res) => {
+  const distPath = path.resolve(process.cwd(), 'dist');
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
+  const debugInfo = {
+    cwd: process.cwd(),
+    dirname: __dirname,
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      VITE_PROD: process.env.VITE_PROD,
+      PORT: process.env.PORT
+    },
+    resolvedDistPath: distPath,
+    distExists: fs.existsSync(distPath),
+    distContents: fs.existsSync(distPath) ? fs.readdirSync(distPath) : [],
+    rootContents: fs.readdirSync(process.cwd()),
+    serverDistContents: fs.existsSync(path.resolve(__dirname, '..')) ? fs.readdirSync(path.resolve(__dirname, '..')) : []
+  };
+
+  res.json(debugInfo);
+});
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   logger.info(`User connected: ${socket.id}`);
