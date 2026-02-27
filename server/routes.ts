@@ -56,7 +56,11 @@ export function registerRoutes(app: Express) {
 
     } catch (error) {
       logger.error(`Error sending OTP: ${error}`);
-      res.status(500).json({ message: 'Failed to send OTP' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({
+        message: 'Failed to send OTP',
+        error: process.env.NODE_ENV === 'production' ? 'Check server logs for details' : errorMessage
+      });
     }
   });
 

@@ -25,6 +25,14 @@ class EmailService {
       },
     });
 
+    console.log('📧 Email Service Config:', {
+      host,
+      port,
+      secure,
+      user: user ? `${user.substring(0, 3)}...` : 'undefined',
+      pass: pass ? '******' : 'undefined'
+    });
+
     if (!host || !user || !pass) {
       console.warn('\n==========================================');
       console.warn('⚠️  EMAIL SERVICE: DEVELOPMENT FALLBACK MODE');
@@ -42,7 +50,14 @@ class EmailService {
       await this.transporter.verify();
       console.log('✅ Email service connected successfully');
     } catch (error) {
-      console.error('❌ Email service verification failed:', error instanceof Error ? error.message : error);
+      console.error('❌ Email service verification failed:');
+      if (error instanceof Error) {
+        console.error(`   Message: ${error.message}`);
+        console.error(`   Code: ${(error as any).code}`);
+        console.error(`   Command: ${(error as any).command}`);
+      } else {
+        console.error(`   Error: ${JSON.stringify(error)}`);
+      }
     }
   }
 

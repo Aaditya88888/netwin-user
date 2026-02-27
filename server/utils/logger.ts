@@ -1,7 +1,8 @@
 export const logger = {
   info: (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    },
+    console.log(`[${timestamp}] INFO: ${message}`);
+  },
   error: (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     console.error(`[${timestamp}] ERROR: ${message}`);
@@ -18,4 +19,5 @@ export const logger = {
 
 export function log(message: string) {
   const timestamp = new Date().toLocaleTimeString();
-  }
+  console.log(`[${timestamp}] ${message}`);
+}
