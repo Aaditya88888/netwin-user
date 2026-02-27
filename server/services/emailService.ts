@@ -13,35 +13,42 @@ class EmailService {
     const host = process.env.SMTP_HOST || (user ? 'smtp.gmail.com' : undefined);
     const port = Number(process.env.SMTP_PORT) || 587;
     // For port 465, secure must be true. For 587, it must be false (STARTTLS).
-    const secure = process.env.SMTP_SECURE !== undefined
+    const secureValue = process.env.SMTP_SECURE !== undefined
       ? process.env.SMTP_SECURE === 'true'
       : port === 465;
 
+    const isGmail = host === 'smtp.gmail.com' || (user?.endsWith('@gmail.com'));
+
     // Create transporter with robust settings for cloud environments
-    this.transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure,
-      auth: {
-        user,
-        pass,
-      },
+    const transportConfig: any = {
       // Robust settings for Render/Cloud
-      connectionTimeout: 10000, // 10s
-      greetingTimeout: 10000,   // 10s
-      socketTimeout: 10000,     // 10s
+      connectionTimeout: 15000, // 15s
+      greetingTimeout: 15000,   // 15s
+      socketTimeout: 15000,     // 15s
       tls: {
         rejectUnauthorized: false // Handle potential certificate issues
-      },
-      requireTLS: port === 587 || !secure
-    });
+      }
+    };
+
+    if (isGmail) {
+      transportConfig.service = 'gmail';
+      transportConfig.auth = { user, pass };
+    } else {
+      transportConfig.host = host;
+      transportConfig.port = port;
+      transportConfig.secure = secureValue;
+      transportConfig.auth = { user, pass };
+      transportConfig.requireTLS = port === 587 || !secureValue;
+    }
+
+    this.transporter = nodemailer.createTransport(transportConfig);
 
     console.log('📧 Email Service Config:', {
-      host,
-      port,
-      secure,
+      service: isGmail ? 'gmail' : 'custom',
+      host: isGmail ? 'smtp.gmail.com' : host,
+      port: isGmail ? 'default' : port,
+      secure: isGmail ? 'default' : secureValue,
       user: user ? `${user.substring(0, 3)}...` : 'undefined',
-      pass: pass ? '******' : 'undefined'
     });
 
     if (!host || !user || !pass) {

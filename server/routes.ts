@@ -30,11 +30,23 @@ export function registerRoutes(app: Express) {
       }
 
       logger.info(`Running email test for: ${email}`);
+
+      const configInfo = {
+        SMTP_HOST: process.env.SMTP_HOST || "not set",
+        SMTP_PORT: process.env.SMTP_PORT || "not set",
+        SMTP_SECURE: process.env.SMTP_SECURE || "not set",
+        SMTP_USER: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}...` : "not set",
+        EMAIL_USER: process.env.EMAIL_USER ? `${process.env.EMAIL_USER.substring(0, 3)}...` : "not set",
+        NODE_ENV: process.env.NODE_ENV,
+        TIME: new Date().toISOString()
+      };
+
       await emailService.sendOtpEmail(email, "123456", "test diagnostic");
 
       res.json({
         success: true,
-        message: `Test email sent to ${email}. Please check your inbox and spam folder.`
+        message: `Test email sent to ${email}.`,
+        config: configInfo
       });
     } catch (error) {
       const err = error as any;
@@ -43,8 +55,11 @@ export function registerRoutes(app: Express) {
         success: false,
         error: err.message,
         code: err.code,
-        command: err.command,
-        response: err.response
+        config_seen_by_server: {
+          SMTP_HOST: process.env.SMTP_HOST || "not set",
+          SMTP_PORT: process.env.SMTP_PORT || "not set",
+          SMTP_SECURE: process.env.SMTP_SECURE || "not set",
+        }
       });
     }
   });
