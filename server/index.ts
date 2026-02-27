@@ -146,6 +146,15 @@ if (process.env.NODE_ENV === 'production' || process.env.VITE_PROD === 'true') {
     logger.warn(`⚠️ Could not find index.html in any expected path. Defaulting to: ${distPath}`);
   }
 
+  // Debug middleware for assets
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/assets/')) {
+      const filePath = path.join(distPath, req.path);
+      logger.info(`🔍 Asset request: ${req.path} -> exists: ${fs.existsSync(filePath)}`);
+    }
+    next();
+  });
+
   app.use(express.static(distPath));
 
   // Handle all other routes by serving index.html (client-side routing)
@@ -153,7 +162,8 @@ if (process.env.NODE_ENV === 'production' || process.env.VITE_PROD === 'true') {
     // If the request looks like a static asset (has a file extension), don't serve index.html
     const ext = path.extname(req.path);
     if (ext && ext !== '.html') {
-      return res.status(404).send(`Asset ${req.path} not found`);
+      logger.warn(`🚫 Asset not found, skipping index.html fallback: ${req.path}`);
+      return res.status(404).type('text/plain').send(`Asset ${req.path} not found`);
     }
 
     const indexPath = path.join(distPath, 'index.html');

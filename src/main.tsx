@@ -14,7 +14,7 @@ import { PWAService } from "./lib/pwaService";
 initializeDebugMode();
 
 // Initialize Service Worker for production builds
-initializeServiceWorker();
+// initializeServiceWorker();
 
 // Initialize performance monitoring
 initializePerformanceMonitoring();
@@ -26,10 +26,12 @@ initializeOfflineSupport();
 ErrorReportingService.initializeErrorHandlers();
 
 // Initialize PWA features
+/*
 if (typeof window !== 'undefined') {  PWAService.initialize().catch(error => {
     console.warn('Failed to initialize PWA features:', error);
   });
 }
+*/
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
