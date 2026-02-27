@@ -111,7 +111,9 @@ class EmailService {
     const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
     const host = process.env.SMTP_HOST || (user ? 'smtp.gmail.com' : undefined);
 
-    // 1. Try Resend HTTP API (Best for Render/Cloud)
+    console.log(`📧 Email Service State: ResendKey=${!!resendApiKey}, SMTP_User=${!!user}, SMTP_Host=${host}`);
+
+    // 1. Try Resend HTTP API (Mandatory on Render)
     if (resendApiKey) {
       try {
         console.log(`📨 Attempting to send email via Resend API to ${email}`);
@@ -122,7 +124,7 @@ class EmailService {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'Netwin Tournament <onboarding@resend.dev>', // Default for testing, change after domain verification
+            from: 'Netwin Tournament <onboarding@resend.dev>',
             to: email,
             subject,
             html
@@ -134,12 +136,12 @@ class EmailService {
           console.log('✅ Email sent successfully via Resend');
           return;
         } else {
-          console.error('❌ Resend API Error:', data);
-          // Fall through to SMTP if Resend fails
+          console.error('❌ Resend API Error:', JSON.stringify(data));
+          throw new Error(`Resend API Error: ${data.message || JSON.stringify(data)}`);
         }
       } catch (error) {
-        console.error('❌ Resend HTTP Fetch Failed:', error);
-        // Fall through to SMTP
+        console.error('❌ Resend Action Failed:', error);
+        throw error; // Don't fall through to SMTP if Resend fails, it will just timeout
       }
     }
 
@@ -153,31 +155,23 @@ class EmailService {
       html,
     };
 
-    // 2. Development Fallback: If no SMTP host or credentials, log the OTP to console and return
+    // 2. Development Fallback (only if no Resend and no SMTP credentials)
     if (!host || host === 'localhost' || !user || !pass) {
       console.log('\n==========================================');
       console.log('📬 DEVELOPMENT OTP FALLBACK');
       console.log(`To: ${email}`);
-      console.log(`From: ${mailOptions.from.address}`);
       console.log(`OTP: ${otp}`);
-      console.log(`Purpose: ${purpose}`);
       console.log('==========================================\n');
       return;
     }
 
-    // 3. SMTP Fallback (Likely to fail on Render due to port blocks)
+    // 3. SMTP Fallback (Likely to fail on Render)
     try {
       console.log(`📨 Attempting to send email via SMTP (${host}) to ${email}`);
       await this.transporter.sendMail(mailOptions);
       console.log('✅ Email sent successfully via SMTP');
     } catch (error: any) {
-      console.error('❌ Nodemailer Error Details:', {
-        message: error.message,
-        code: error.code,
-        command: error.command,
-        response: error.response,
-        stack: error.stack
-      });
+      console.error('❌ Nodemailer/SMTP Error:', error.message);
       throw error;
     }
   }

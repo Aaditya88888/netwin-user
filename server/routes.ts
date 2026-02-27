@@ -48,18 +48,13 @@ export function registerRoutes(app: Express) {
         message: `Test email sent to ${email}.`,
         config: configInfo
       });
-    } catch (error) {
-      const err = error as any;
-      logger.error(`Debug Email Test Failed: ${err.message}`);
+    } catch (error: any) {
+      logger.error(`Debug Email Test Failed: ${error.message}`);
       res.status(500).json({
         success: false,
-        error: err.message,
-        code: err.code,
-        config_seen_by_server: {
-          SMTP_HOST: process.env.SMTP_HOST || "not set",
-          SMTP_PORT: process.env.SMTP_PORT || "not set",
-          SMTP_SECURE: process.env.SMTP_SECURE || "not set",
-        }
+        error: error.message,
+        details: error.toString(),
+        hint: error.message.includes('Resend') ? 'Check your Resend API key and verify you are sending to the correct test email.' : 'SMTP Timeout/Error detected.'
       });
     }
   });
