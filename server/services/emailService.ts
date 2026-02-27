@@ -8,26 +8,41 @@ class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    // Create transporter with Zoho SMTP
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    const host = process.env.SMTP_HOST || (user ? 'smtp.zoho.com' : undefined);
+    const port = Number(process.env.SMTP_PORT) || 465;
+    const secure = process.env.SMTP_SECURE === undefined ? port === 465 : process.env.SMTP_SECURE === 'true';
+
+    // Create transporter
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
+      host,
+      port,
+      secure,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user,
+        pass,
       },
     });
 
-    // Verify connection
-    this.verifyConnection();
+    if (!host || !user || !pass) {
+      console.warn('\n==========================================');
+      console.warn('⚠️  EMAIL SERVICE: DEVELOPMENT FALLBACK MODE');
+      console.warn('SMTP credentials not fully configured.');
+      console.warn('Emails will be logged to console instead of sent.');
+      console.warn('==========================================\n');
+    } else {
+      // Verify connection only if configured
+      this.verifyConnection();
+    }
   }
 
   private async verifyConnection() {
     try {
       await this.transporter.verify();
+      console.log('✅ Email service connected successfully');
     } catch (error) {
-      // Email service verification failed - continuing without verification
+      console.error('❌ Email service verification failed:', error instanceof Error ? error.message : error);
     }
   }
 
@@ -58,21 +73,26 @@ class EmailService {
       </div>
     `;
 
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    const host = process.env.SMTP_HOST || (user ? 'smtp.zoho.com' : undefined);
+
     const mailOptions = {
       from: {
         name: 'Netwin Tournament',
-        address: process.env.SMTP_USER || 'noreply@netwin.com'
+        address: user || 'noreply@netwin.com'
       },
       to: email,
       subject,
       html,
     };
 
-    // Development Fallback: If no SMTP host is configured, log the OTP to console and return
-    if (!process.env.SMTP_HOST || process.env.SMTP_HOST === 'localhost' || !process.env.SMTP_USER) {
+    // Development Fallback: If no SMTP host or credentials, log the OTP to console and return
+    if (!host || host === 'localhost' || !user || !pass) {
       console.log('\n==========================================');
       console.log('📬 DEVELOPMENT OTP FALLBACK');
       console.log(`To: ${email}`);
+      console.log(`From: ${mailOptions.from.address}`);
       console.log(`OTP: ${otp}`);
       console.log(`Purpose: ${purpose}`);
       console.log('==========================================\n');

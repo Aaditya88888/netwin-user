@@ -113,7 +113,7 @@ export default function Signup() {
     setUsernameChecking(true);
     try {      // This will use the case-insensitive matching we implemented
       const exists = await checkUsernameExists(username);
-      
+
       if (exists) {
         setUsernameAvailable(false);
       } else {
@@ -128,14 +128,14 @@ export default function Signup() {
   // Handle email form submission
   async function onEmailSubmit(values: SignupWithEmailValues) {
     setIsLoading(true);
-    
+
     try {
       // Store the signup data for OTP verification
       setPendingSignupData(values);
-      
+
       // Show OTP modal
       setShowOtpModal(true);
-      
+
     } catch (error) {
       const err = error as { message?: string };
       toast({
@@ -162,20 +162,20 @@ export default function Signup() {
         country: pendingSignupData.country,
         currency: pendingSignupData.currency
       }));
-      
+
       // Create the account
       await signUpWithEmail(pendingSignupData.email, pendingSignupData.password);
-      
+
       toast({
         title: "Account created successfully!",
         description: "Welcome to Netwin! Your username is: " + pendingSignupData.username,
       });
-      
+
       // Close OTP modal
       setShowOtpModal(false);
       setPendingSignupData(null);
-      
-      navigate("/");
+
+      navigate("/dashboard");
     } catch (error) {
       const err = error as { message?: string };
       toast({
@@ -438,8 +438,8 @@ export default function Signup() {
           </div>
 
           <Separator className="bg-gray-800" />          <div className="text-center text-xs text-gray-500">            <p>
-              By creating an account, you agree to our Terms of Service and Privacy Policy.
-            </p>
+            By creating an account, you agree to our Terms of Service and Privacy Policy.
+          </p>
           </div>
         </div>
       </div>
