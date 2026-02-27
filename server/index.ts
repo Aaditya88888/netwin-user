@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { registerRoutes } from './routes.js';
@@ -94,13 +95,43 @@ registerRoutes(app);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production' || process.env.VITE_PROD === 'true') {
-  const distPath = path.resolve(process.cwd(), 'dist');
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
+  // Try several possible locations for 'dist' folder on Render
+  const possiblePaths = [
+    path.resolve(process.cwd(), 'dist'),
+    path.resolve(__dirname, '../../dist'),
+    path.resolve(__dirname, '../../../dist')
+  ];
+
+  let distPath = possiblePaths[0];
+  let found = false;
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(path.join(p, 'index.html'))) {
+      distPath = p;
+      found = true;
+      break;
+    }
+  }
+
+  if (found) {
+    logger.info(`✅ Found static assets at: ${distPath}`);
+  } else {
+    logger.warn(`⚠️ Could not find index.html in any expected path. Defaulting to: ${distPath}`);
+  }
 
   app.use(express.static(distPath));
 
   // Handle all other routes by serving index.html (client-side routing)
   app.get('*', (_req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
+    const indexPath = path.join(distPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).send('Static assets not found. Please check build logs.');
+    }
   });
 } else {
   // Handle all other routes in development
