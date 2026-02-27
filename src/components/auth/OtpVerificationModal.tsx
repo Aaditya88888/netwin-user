@@ -14,12 +14,12 @@ interface OtpVerificationModalProps {
   onCancel: () => void;
 }
 
-export const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({ 
-  open, 
-  onOpenChange, 
+export const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
+  open,
+  onOpenChange,
   email,
   onVerificationSuccess,
-  onCancel 
+  onCancel
 }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
@@ -49,10 +49,10 @@ export const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
     try {
       setResendLoading(true);
       setError('');
-      
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+
+      const apiUrl = import.meta.env.VITE_API_URL || '';
       const endpoint = `${apiUrl}/api/auth/send-otp`;
-      
+
       // Call the backend API to send OTP
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -71,11 +71,11 @@ export const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
       }
 
       const data = await response.json();
-      
+
       setTimeLeft(data.expires || 300); // Reset timer
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
-      
+
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to send OTP. Please try again.';
       setError(errorMessage);
@@ -86,7 +86,7 @@ export const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -111,14 +111,14 @@ export const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
       setError('');
 
       const enteredOtp = otp.join('');
-      
+
       if (enteredOtp.length !== 6) {
         setError('Please enter the complete 6-digit OTP');
         return;
       }
 
       // Call the backend API to verify OTP
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/auth/verify-otp`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ export const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
       }
 
       const data = await response.json();
-      
+
       if (data.verified) {
         onVerificationSuccess();
       } else {
@@ -215,7 +215,7 @@ export const OtpVerificationModal: React.FC<OtpVerificationModalProps> = ({
             ) : (
               <p className="text-sm text-red-400">Code has expired</p>
             )}
-            
+
             {(canResend || timeLeft === 0) && (
               <Button
                 type="button"
