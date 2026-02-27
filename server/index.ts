@@ -149,7 +149,13 @@ if (process.env.NODE_ENV === 'production' || process.env.VITE_PROD === 'true') {
   app.use(express.static(distPath));
 
   // Handle all other routes by serving index.html (client-side routing)
-  app.get('*', (_req, res) => {
+  app.get('*', (req, res) => {
+    // If the request looks like a static asset (has a file extension), don't serve index.html
+    const ext = path.extname(req.path);
+    if (ext && ext !== '.html') {
+      return res.status(404).send(`Asset ${req.path} not found`);
+    }
+
     const indexPath = path.join(distPath, 'index.html');
     if (fs.existsSync(indexPath)) {
       res.sendFile(indexPath);
