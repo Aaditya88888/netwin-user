@@ -21,6 +21,34 @@ export function registerRoutes(app: Express) {
     res.json({ status: "ok", message: "Server is running" });
   });
 
+  // Debug: Test Email Service
+  app.get("/api/debug/test-email", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.query;
+      if (!email || typeof email !== 'string') {
+        return res.status(400).json({ error: "Email query parameter is required" });
+      }
+
+      logger.info(`Running email test for: ${email}`);
+      await emailService.sendOtpEmail(email, "123456", "test diagnostic");
+
+      res.json({
+        success: true,
+        message: `Test email sent to ${email}. Please check your inbox and spam folder.`
+      });
+    } catch (error) {
+      const err = error as any;
+      logger.error(`Debug Email Test Failed: ${err.message}`);
+      res.status(500).json({
+        success: false,
+        error: err.message,
+        code: err.code,
+        command: err.command,
+        response: err.response
+      });
+    }
+  });
+
   // OTP Routes
   app.post("/api/auth/send-otp", async (req: Request, res: Response) => {
     try {

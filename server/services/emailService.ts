@@ -14,7 +14,7 @@ class EmailService {
     const port = Number(process.env.SMTP_PORT) || 465;
     const secure = process.env.SMTP_SECURE === undefined ? port === 465 : process.env.SMTP_SECURE === 'true';
 
-    // Create transporter
+    // Create transporter with robust settings for cloud environments
     this.transporter = nodemailer.createTransport({
       host,
       port,
@@ -23,6 +23,13 @@ class EmailService {
         user,
         pass,
       },
+      // Robust settings for Render/Cloud
+      connectionTimeout: 10000, // 10s
+      greetingTimeout: 10000,   // 10s
+      socketTimeout: 10000,     // 10s
+      tls: {
+        rejectUnauthorized: false // Handle potential certificate issues
+      }
     });
 
     console.log('📧 Email Service Config:', {
@@ -115,16 +122,14 @@ class EmailService {
     }
     try {
       await this.transporter.sendMail(mailOptions);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error('Nodemailer Error Details:', {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
-        });
-      } else {
-        console.error('Unknown Nodemailer Error:', error);
-      }
+    } catch (error: any) {
+      console.error('❌ Nodemailer Error Details:', {
+        message: error.message,
+        code: error.code,
+        command: error.command,
+        response: error.response,
+        stack: error.stack
+      });
       throw error;
     }
   }
