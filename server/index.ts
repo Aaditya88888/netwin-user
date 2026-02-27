@@ -168,6 +168,8 @@ if (process.env.NODE_ENV === 'production' || process.env.VITE_PROD === 'true') {
 
     const indexPath = path.join(distPath, 'index.html');
     if (fs.existsSync(indexPath)) {
+      // Prevent browser from caching index.html so it always gets the latest asset hashes
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       res.sendFile(indexPath);
     } else {
       res.status(404).send('Static assets not found. Please check build logs.');
