@@ -21,9 +21,15 @@ services:
         sync: false
       - key: VITE_FIREBASE_APP_ID
         sync: false
-      - key: EMAIL_USER
+      - key: SMTP_HOST
         sync: false
-      - key: EMAIL_PASS
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
         sync: false
       - key: FIREBASE_SERVICE_ACCOUNT
         sync: false
