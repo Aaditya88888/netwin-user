@@ -10,9 +10,12 @@ class EmailService {
   constructor() {
     const user = process.env.SMTP_USER || process.env.EMAIL_USER;
     const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-    const host = process.env.SMTP_HOST || (user ? 'smtp.zoho.com' : undefined);
-    const port = Number(process.env.SMTP_PORT) || 465;
-    const secure = process.env.SMTP_SECURE === undefined ? port === 465 : process.env.SMTP_SECURE === 'true';
+    const host = process.env.SMTP_HOST || (user ? 'smtp.gmail.com' : undefined);
+    const port = Number(process.env.SMTP_PORT) || 587;
+    // For port 465, secure must be true. For 587, it must be false (STARTTLS).
+    const secure = process.env.SMTP_SECURE !== undefined
+      ? process.env.SMTP_SECURE === 'true'
+      : port === 465;
 
     // Create transporter with robust settings for cloud environments
     this.transporter = nodemailer.createTransport({
@@ -29,7 +32,8 @@ class EmailService {
       socketTimeout: 10000,     // 10s
       tls: {
         rejectUnauthorized: false // Handle potential certificate issues
-      }
+      },
+      requireTLS: port === 587 || !secure
     });
 
     console.log('📧 Email Service Config:', {
